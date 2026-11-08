@@ -3,94 +3,1352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Planner</title>
+    <title>Daily Planner & Weekly Habit Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #fdfdfd; padding: 15px; display: flex; justify-content: center; }
-        .card { background: white; width: 100%; max-width: 380px; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #eee; }
-        h2 { margin: 0; font-size: 18px; color: #333; }
-        .line { height: 3px; background: #FFD700; width: 40px; margin: 10px 0 20px 0; }
-        .task { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
-        input[type="checkbox"] { width: 22px; height: 22px; margin-right: 15px; cursor: pointer; }
-        label { font-size: 15px; color: #555; flex: 1; }
-        .btn { width: 100%; padding: 15px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        .save { background: #4caf50; color: white; }
-        .submit { background: #f44336; color: white; }
-        #msg { text-align: center; margin-top: 15px; font-size: 14px; font-weight: bold; }
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --success-border: #a7f3d0;
+            --success-text: #065f46;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --danger-border: #fecaca;
+            --danger-text: #991b1b;
+            --warning: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+            color: var(--gray-800);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 820px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Card container */
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--gray-200);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .title-group h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-group p {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        
+
+        
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 20px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .progress-label-wrap {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 9999px;
+        }
+
+        /* Task list */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .task:hover {
+            border-color: var(--gray-300);
+            background: var(--gray-50);
+        }
+
+        .task.completed {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .task input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--gray-300);
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            margin-right: 14px;
+            display: grid;
+            place-content: center;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+            background: white;
+        }
+
+        .task input[type="checkbox"]:checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .task input[type="checkbox"]:checked::before {
+            content: "✓";
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .task label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-800);
+            flex: 1;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .task.completed label {
+            color: var(--gray-400);
+            text-decoration: line-through;
+        }
+
+        .task-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            margin-left: 8px;
+        }
+
+        .task-tag.swap {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        /* Action Buttons */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 13px 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn.save {
+            background: var(--success);
+            color: white;
+        }
+        .btn.save:hover {
+            background: #059669;
+        }
+
+        .btn.submit {
+            background: var(--danger);
+            color: white;
+        }
+        .btn.submit:hover {
+            background: #dc2626;
+        }
+
+        .btn.secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        .btn.secondary:hover {
+            background: var(--gray-200);
+        }
+
+        #msg {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 13px;
+            font-weight: 500;
+            min-height: 20px;
+        }
+
+        /* Table Card Section */
+        .table-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--gray-200);
+        }
+
+        .table-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .table-title h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .table-title p {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 2px;
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .week-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .week-nav button {
+            background: transparent;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-700);
+            cursor: pointer;
+        }
+
+        .week-nav button:hover {
+            background: #ffffff;
+        }
+
+        .btn-sm {
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--gray-300);
+            background: #ffffff;
+            color: var(--gray-700);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-sm:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+        /* Scrollable Table */
+        .table-scroll-wrapper {
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            background: #ffffff;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table.habit-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 650px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        table.habit-table th, 
+        table.habit-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--gray-200);
+            border-right: 1px solid var(--gray-100);
+        }
+
+        table.habit-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        table.habit-table th.task-col-head,
+        table.habit-table td.task-col {
+            position: sticky;
+            left: 0;
+            background: #ffffff;
+            z-index: 10;
+            text-align: left;
+            padding-left: 14px;
+            font-weight: 500;
+            min-width: 160px;
+            max-width: 200px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.03);
+            border-right: 2px solid var(--gray-200);
+        }
+
+        table.habit-table th.task-col-head {
+            background: var(--gray-50);
+            z-index: 15;
+            font-weight: 700;
+        }
+
+        .day-header-cell {
+            padding: 8px 4px;
+        }
+
+        .day-name {
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .day-date {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-top: 2px;
+        }
+
+        .day-header-cell.is-today .day-name {
+            color: var(--primary);
+        }
+
+        .day-header-cell.is-today .day-date {
+            background: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            padding: 1px 6px;
+            display: inline-block;
+        }
+
+        /* Status Boxes */
+        .status-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .status-box:hover {
+            transform: scale(1.1);
+        }
+
+        .status-box.completed {
+            background: var(--success);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-box.pending {
+            background: var(--danger);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
+        }
+
+        .status-box.na {
+            background: var(--gray-100);
+            color: var(--gray-400);
+            border: 1px dashed var(--gray-300);
+            cursor: not-allowed;
+            font-size: 12px;
+        }
+        .status-box.na:hover {
+            transform: none;
+        }
+
+        .summary-row {
+            background: var(--gray-50);
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        
+
+        /* Modal dialog (in-page, sandbox-safe) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 480px;
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(10px);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+
+        .modal-body {
+            font-size: 14px;
+            color: var(--gray-600);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        
+
+        
+
+        @media (max-width: 600px) {
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+            .header-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+        }
+
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 700;
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #ffedd5;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn-mark-all {
+            background: #ffffff;
+            border: 1px solid var(--gray-300);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        .btn-mark-all:hover {
+            background: var(--gray-50);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .weekly-score-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            margin-top: 6px;
+        }
+
+        .weekly-score-pill .score-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: var(--success);
+        }
     </style>
 </head>
 <body>
 
-<div class="card" id="planner-ui">
-    <h2 id="day-header">Daily Planner</h2>
-    <div class="line"></div>
-    
-    <div id="task-list">
-        <div class="task"><input type="checkbox"><label>Wake up 5.00 am</label></div>
-        <div class="task"><input type="checkbox"><label>Drink 1 Glass Water</label></div>
-        <div class="task"><input type="checkbox"><label>10 Min Meditation</label></div>
-        <div class="task"><input type="checkbox"><label>10 Min Walk</label></div>
-        <div class="task"><input type="checkbox"><label>Nut, Seeds Feed</label></div>
-        <div class="task"><input type="checkbox"><label>Gk Read For 2 Hour</label></div>
-        <div class="task"><input type="checkbox"><label>No Use Phone For 1 Hour</label></div>
+<div class="container">
+    <!-- Top Daily Checklist Card -->
+    <div class="card" id="planner-card">
+        <div class="header-top">
+            <div class="title-group">
+                <h1 id="day-header">Daily Planner</h1>
+                <p id="date-subtitle">Loading schedule...</p>
+            </div>
+            <div class="streak-badge" id="streak-badge" title="Consecutive days with 100% completion">
+                <span>🔥</span>
+                <span id="streak-text">0 Day Streak</span>
+            </div>
+        </div>
+
+        
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-label-wrap" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span>Today's Completion</span>
+                    <span id="progress-pct" style="font-size:12px; font-weight:500; color:var(--gray-500);">0% (0/0)</span>
+                </div>
+                <button type="button" class="btn-mark-all" id="btn-mark-all" onclick="toggleMarkAll()">
+                    ✓ Mark All Done
+                </button>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Tasks Checklist Container -->
+        <div id="task-list" class="task-list">
+            <!-- Dynamic task rows injected here -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="btn-group">
+            <button class="btn save" id="btn-save" onclick="saveData()">
+                <span>💾</span> Save Progress
+            </button>
+            <button class="btn submit" id="btn-end-day" onclick="showEndDayModal()">
+                <span>🔒</span> End Day (Lock)
+            </button>
+        </div>
+
+        <p id="msg"></p>
     </div>
 
-    <button class="btn save" onclick="saveData()">Save Progress</button>
-    <button class="btn submit" onclick="endDay()">End Day (Lock)</button>
-    <p id="msg"></p>
+    <!-- Weekly Scrollable Progress Table Card -->
+    <div class="table-card">
+        <div class="table-header-row">
+            <div class="table-title">
+                <h2>Weekly Habit Performance</h2>
+                <div class="weekly-score-pill" id="weekly-score-pill">
+                    <span class="score-dot" id="score-dot"></span>
+                    <span>Weekly Consistency: <strong id="weekly-consistency-val">0%</strong></span>
+                </div>
+            </div>
+            <div class="table-actions">
+                <div class="week-nav">
+                    <button onclick="changeWeek(-1)" title="Previous Week">◀ Prev</button>
+                    <button onclick="changeWeek(0)" id="week-label" title="Current Week">This Week</button>
+                    <button onclick="changeWeek(1)" title="Next Week">Next ▶</button>
+                </div>
+                <button class="btn-sm" onclick="fetchSheetData(true)" title="Fetch and sync from Google Sheets">
+                    <span>🔄</span> Fetch Sheet
+                </button>
+                
+            </div>
+        </div>
+
+        <!-- Scrollable Table -->
+        <div class="table-scroll-wrapper">
+            <table class="habit-table" id="habit-table">
+                <thead>
+                    <tr id="table-head-row">
+                        <th class="task-col-head">Task Name</th>
+                        <!-- Days injected dynamically -->
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Rows injected dynamically -->
+                </tbody>
+                <tfoot>
+                    <tr id="table-summary-row" class="summary-row">
+                        <td class="task-col" style="font-weight:700;">Score / Total</td>
+                        <!-- Summary counts injected dynamically -->
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        </div>
+    </div>
 </div>
 
-<script>
-    // PASTE YOUR NEW URL HERE
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxgeI6YUSd3XZ-hofQqiDpWpLnpgHrm0Jldj0UyVi0cO3cmdXl9aFXId-erocLeEkxX/exec';
-    
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    let todayIndex = new Date().getDate();
+<!-- Modal: End Day Confirmation -->
+<div class="modal-overlay" id="end-day-modal">
+    <div class="modal-box">
+        <div class="modal-header">Lock & End Today's Routine?</div>
+        <div class="modal-body">
+            Are you sure you want to finalize today's tasks? This will save your final progress to Google Sheets and lock today's session.
+        </div>
+        <div class="modal-actions">
+            <button class="btn secondary" onclick="closeEndDayModal()">Cancel</button>
+            <button class="btn submit" onclick="confirmEndDay()">Confirm & Lock</button>
+        </div>
+    </div>
+</div>
 
-    function setHeader() {
-        document.getElementById('day-header').innerText = "Daily Planner: " + days[new Date().getDay()];
+
+
+
+<script>
+    // Master task definitions
+    // Day 1, 3, 5, 7... has "Chia Seeds"
+    // Day 2, 4, 6, 8... swaps/omits "Chia Seeds"
+    const oddDayTasks = [
+        "Wake up 4.00 am",
+        "Drink 2 Glass Water",
+        "brush",
+        "10 Min Meditation",
+        "Chia Seeds",
+        "Numerical 30 min",
+        "Gk Read For 2 Hour",
+        "No Use Phone For 1 Hour",
+        "Gym",
+        "bath"
+    ];
+
+    const evenDayTasks = [
+        "Wake up 4.00 am",
+        "Drink 2 Glass Water",
+        "brush",
+        "10 Min Meditation",
+        "Numerical 30 min",
+        "Gk Read For 2 Hour",
+        "No Use Phone For 1 Hour",
+        "Gym",
+        "bath"
+    ];
+
+    // Master list of all distinct tasks for the weekly table left column
+    const allMasterTasks = [
+        "Wake up 4.00 am",
+        "Drink 2 Glass Water",
+        "brush",
+        "10 Min Meditation",
+        "Chia Seeds",
+        "Numerical 30 min",
+        "Gk Read For 2 Hour",
+        "No Use Phone For 1 Hour",
+        "Gym",
+        "bath"
+    ];
+
+    const defaultScriptURL = 'https://script.google.com/macros/s/AKfycbxgeI6YUSd3XZ-hofQqiDpWpLnpgHrm0Jldj0UyVi0cO3cmdXl9aFXId-erocLeEkxX/exec';
+    
+    function getScriptURL() {
+        try {
+            return localStorage.getItem('planner_script_url') || defaultScriptURL;
+        } catch (e) {
+            return defaultScriptURL;
+        }
     }
 
-    // Auto-refresh the page if the date changes
-    setInterval(() => {
-        if (new Date().getDate() !== todayIndex) {
-            location.reload();
+    const daysName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const monthsName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        let weekOffset = 0; // 0 = current week, -1 = last week, +1 = next week
+    let dayIndex = new Date().getDate();
+
+    // Helper: Format date as YYYY-MM-DD
+    function formatDateKey(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    // Helper: Determine if a date is odd or even
+    function isOddDayDate(date) {
+        return date.getDate() % 2 !== 0;
+    }
+
+    // Helper: Check if a task is scheduled on a specific date
+    // - Chia Seeds: Odd days only (Day 1, 3, 5, 7...)
+    // - Gym: Monday through Saturday (Sunday is Rest Day)
+    function isTaskApplicable(taskName, date) {
+        if (taskName === 'Chia Seeds' && !isOddDayDate(date)) {
+            return false;
         }
-    }, 30000);
+        if (taskName === 'Gym' && date.getDay() === 0) {
+            return false; // Sunday Rest Day
+        }
+        return true;
+    }
 
-    async function saveData() {
-        const msg = document.getElementById('msg');
-        msg.innerText = "Updating Google Sheet...";
-        msg.style.color = "#888";
+    // Get current active tasks for today's checklist
+    function getActiveTasks() {
+        const today = new Date();
+        return (isOddDayDate(today) ? oddDayTasks : evenDayTasks);
+    }
 
-        const taskData = [];
-        document.querySelectorAll('#task-list input').forEach(box => {
-            taskData.push({ status: box.checked ? "Completed" : "Pending" });
+    // Storage helpers
+    function getStoredRecords() {
+        try {
+            const raw = localStorage.getItem('daily_habit_records');
+            const records = raw ? JSON.parse(raw) : {};
+            // Migrate 5.00 am -> 4.00 am if present
+            Object.keys(records).forEach(k => {
+                if (records[k] && records[k]['Wake up 5.00 am'] && !records[k]['Wake up 4.00 am']) {
+                    records[k]['Wake up 4.00 am'] = records[k]['Wake up 5.00 am'];
+                }
+            });
+            return records;
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveStoredRecords(records) {
+        try {
+            localStorage.setItem('daily_habit_records', JSON.stringify(records));
+        } catch (e) {
+            console.error("Storage error:", e);
+        }
+    }
+
+    function getTodayRecord() {
+        const records = getStoredRecords();
+        const todayKey = formatDateKey(new Date());
+        return records[todayKey] || {};
+    }
+
+    function setTodayRecord(taskStatuses) {
+        const records = getStoredRecords();
+        const todayKey = formatDateKey(new Date());
+        records[todayKey] = taskStatuses;
+        saveStoredRecords(records);
+    }
+
+    // Render Daily Checklist Header and UI
+    function renderPlannerHeader() {
+        const now = new Date();
+        const dayOfWeek = daysName[now.getDay()];
+        const dayNum = now.getDate();
+        const monthName = monthsName[now.getMonth()];
+        const year = now.getFullYear();
+
+        document.getElementById('day-header').innerText = `Daily Planner: ${dayOfWeek}`;
+        document.getElementById('date-subtitle').innerText = `${monthName} ${dayNum}, ${year}`;
+    }
+
+    
+
+    // Render Checklist Tasks
+    function renderTaskList() {
+        const taskListEl = document.getElementById('task-list');
+        taskListEl.innerHTML = '';
+
+        const activeTasks = getActiveTasks();
+        const todayRecord = getTodayRecord();
+        const today = new Date();
+        const isSunday = today.getDay() === 0;
+
+        activeTasks.forEach((taskName, index) => {
+            const isCompleted = todayRecord[taskName] === 'Completed';
+
+            const taskDiv = document.createElement('div');
+            taskDiv.className = `task ${isCompleted ? 'completed' : ''}`;
+            taskDiv.id = `task-row-${index}`;
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `chk-task-${index}`;
+            checkbox.checked = isCompleted;
+            
+            // Only update card progress visually when checking; do NOT commit to weekly table until "Save Progress"
+            checkbox.addEventListener('change', () => {
+                taskDiv.classList.toggle('completed', checkbox.checked);
+                updateProgressBar();
+                updateMarkAllButtonText();
+            });
+
+            const label = document.createElement('label');
+            label.htmlFor = `chk-task-${index}`;
+            label.innerText = taskName;
+
+            taskDiv.appendChild(checkbox);
+            taskDiv.appendChild(label);
+
+            // Sunday Gym Rest Day indicator
+            if (taskName === 'Gym' && isSunday) {
+                const restTag = document.createElement('span');
+                restTag.className = 'task-tag';
+                restTag.style.cssText = 'background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; font-size: 11px; padding: 2px 6px; border-radius: 4px;';
+                restTag.innerText = 'Sunday Rest Day';
+                taskDiv.appendChild(restTag);
+            }
+
+            // Click anywhere on row toggles checkbox
+            taskDiv.addEventListener('click', (e) => {
+                if (e.target !== checkbox && e.target !== label) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+
+            taskListEl.appendChild(taskDiv);
         });
 
+        updateProgressBar();
+        updateMarkAllButtonText();
+    }
+
+    // Toggle Mark All Done / Uncheck All (Local check only; saves to table & sheet only on 'Save Progress')
+    function toggleMarkAll() {
+        const checkboxes = document.querySelectorAll('#task-list input[type="checkbox"]');
+        let allChecked = true;
+        checkboxes.forEach(chk => { if (!chk.checked) allChecked = false; });
+
+        const newState = !allChecked;
+        checkboxes.forEach(chk => {
+            chk.checked = newState;
+            const taskDiv = chk.closest('.task');
+            if (taskDiv) taskDiv.classList.toggle('completed', newState);
+        });
+
+        updateProgressBar();
+        updateMarkAllButtonText();
+    }
+
+    function updateMarkAllButtonText() {
+        const btn = document.getElementById('btn-mark-all');
+        if (!btn) return;
+        const checkboxes = document.querySelectorAll('#task-list input[type="checkbox"]');
+        let allChecked = checkboxes.length > 0;
+        checkboxes.forEach(chk => { if (!chk.checked) allChecked = false; });
+        btn.innerText = allChecked ? "↺ Uncheck All" : "✓ Mark All Done";
+    }
+
+    function updateProgressBar() {
+        const checkboxes = document.querySelectorAll('#task-list input[type="checkbox"]');
+        const total = checkboxes.length;
+        let completed = 0;
+        checkboxes.forEach(chk => {
+            if (chk.checked) completed++;
+        });
+
+        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('progress-pct').innerText = `${pct}% (${completed}/${total} completed)`;
+    }
+
+    // Save Progress (POST to Google Sheet & LocalStorage, and commit checkmarks to Weekly Table)
+    async function saveData(isFinalLock = false) {
+        const msg = document.getElementById('msg');
+        msg.innerText = "⏳ Saving & updating sheet...";
+        msg.style.color = "#4b5563";
+
+        const taskData = [];
+        const taskMap = {};
+
+        document.querySelectorAll('#task-list .task').forEach(row => {
+            const taskLabel = row.querySelector('label').innerText.trim();
+            const isChecked = row.querySelector('input[type="checkbox"]').checked;
+            const status = isChecked ? "Completed" : "Pending";
+            
+            taskData.push({ task: taskLabel, status: status });
+            taskMap[taskLabel] = status;
+        });
+
+        // Commit to saved records and update the weekly table checkmarks NOW
+        setTodayRecord(taskMap);
+        renderWeeklyTable();
+        updateStreakDisplay();
+
+        const payload = {
+            date: formatDateKey(new Date()),
+            day: daysName[new Date().getDay()],
+            dayNumber: new Date().getDate(),
+            tasks: taskData,
+            timestamp: new Date().toISOString(),
+            isLocked: isFinalLock
+        };
+
+        const targetURL = getScriptURL();
+
         try {
-            await fetch(scriptURL, {
+            await fetch(targetURL, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({ tasks: taskData })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-            msg.innerText = "✅ Successfully Updated!";
-            msg.style.color = "green";
+            msg.innerText = isFinalLock ? "🔒 Day Locked & Synced" : "✅ Saved to Sheet & Table Updated";
+            msg.style.color = "#059669";
+            setTimeout(() => { msg.innerText = ""; }, 2500);
         } catch (e) {
-            msg.innerText = "❌ Connection Error";
-            msg.style.color = "red";
+            msg.innerText = "✅ Saved to Table & Local Storage";
+            msg.style.color = "#059669";
+            setTimeout(() => { msg.innerText = ""; }, 2500);
         }
     }
 
-    function endDay() {
-        if(confirm("Submit final tasks? The form will clear for tomorrow.")) {
-            saveData();
-            setTimeout(() => {
-                document.getElementById('planner-ui').innerHTML = "<h3 style='text-align:center'>Day Finished!</h3><p style='text-align:center'>Your goals for today are logged. Rest well!</p>";
-            }, 1000);
+    // In-page modal controls for End Day (replacing blocked confirm)
+    function showEndDayModal() {
+        document.getElementById('end-day-modal').classList.add('active');
+    }
+
+    function closeEndDayModal() {
+        document.getElementById('end-day-modal').classList.remove('active');
+    }
+
+    async function confirmEndDay() {
+        closeEndDayModal();
+        await saveData(true);
+        const plannerCard = document.getElementById('planner-card');
+        plannerCard.innerHTML = `
+            <div style="text-align: center; padding: 30px 10px;">
+                <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+                <h2 style="font-size: 22px; color: var(--gray-900); margin-bottom: 8px;">Day Finished & Locked!</h2>
+                <p style="font-size: 14px; color: var(--gray-600); max-width: 420px; margin: 0 auto 20px auto;">
+                    Great job today! Your morning routine and habits have been recorded to your sheet. The planner will unlock fresh tomorrow morning.
+                </p>
+                <button class="btn secondary" style="margin: 0 auto; display: inline-flex;" onclick="location.reload()">
+                    <span>🔄</span> Refresh View
+                </button>
+            </div>
+        `;
+    }
+
+    
+    // Streak Counter Calculation
+    // Checks consecutive 100% completed days considering scheduled tasks (Chia seeds on odd days, Gym off on Sunday)
+    function calculateStreak() {
+        const records = getStoredRecords();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        function isDayComplete(d) {
+            const key = formatDateKey(d);
+            const rec = records[key];
+            if (!rec) return false;
+            
+            // Check all applicable tasks for date d
+            for (let task of allMasterTasks) {
+                if (isTaskApplicable(task, d)) {
+                    if (rec[task] !== 'Completed') return false;
+                }
+            }
+            return true;
+        }
+
+        let streak = 0;
+        const checkDate = new Date(today);
+
+        // Check if today is already 100% completed
+        if (isDayComplete(checkDate)) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+            // If today is not completed yet, streak from yesterday is still alive
+            checkDate.setDate(checkDate.getDate() - 1);
+        }
+
+        // Count consecutive days backward
+        while (isDayComplete(checkDate)) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+        }
+
+        return streak;
+    }
+
+    function updateStreakDisplay() {
+        const streakEl = document.getElementById('streak-text');
+        if (!streakEl) return;
+        const streak = calculateStreak();
+        streakEl.innerText = `${streak} Day${streak === 1 ? '' : 's'} Streak`;
+    }
+
+    // WEEKLY SCROLLABLE TABLE LOGIC
+    function getWeekDates(offset) {
+        const today = new Date();
+        const currentDayIndex = today.getDay(); // 0 is Sunday
+        
+        // Find Sunday of this week
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - currentDayIndex + (offset * 7));
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const weekDates = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(startOfWeek);
+            d.setDate(startOfWeek.getDate() + i);
+            weekDates.push(d);
+        }
+        return weekDates;
+    }
+
+    function changeWeek(delta) {
+        if (delta === 0) {
+            weekOffset = 0;
+        } else {
+            weekOffset += delta;
+        }
+        renderWeeklyTable();
+    }
+
+    function renderWeeklyTable() {
+        const weekDates = getWeekDates(weekOffset);
+        const records = getStoredRecords();
+        const todayKey = formatDateKey(new Date());
+
+        // Update Week Navigation Label
+        const startStr = `${monthsName[weekDates[0].getMonth()]} ${weekDates[0].getDate()}`;
+        const endStr = `${monthsName[weekDates[6].getMonth()]} ${weekDates[6].getDate()}`;
+        document.getElementById('week-label').innerText = weekOffset === 0 ? `This Week (${startStr} - ${endStr})` : `${startStr} - ${endStr}`;
+
+        // Build Table Header
+        const headRow = document.getElementById('table-head-row');
+        headRow.innerHTML = '<th class="task-col-head">Task Name</th>';
+
+        weekDates.forEach(date => {
+            const dateKey = formatDateKey(date);
+            const isToday = dateKey === todayKey;
+            const th = document.createElement('th');
+            th.className = 'day-header-cell' + (isToday ? ' is-today' : '');
+            
+            const dayNum = date.getDate();
+            const isOdd = date.getDate() % 2 !== 0;
+
+            th.innerHTML = `
+                <div class="day-name">${daysName[date.getDay()].slice(0, 3)}</div>
+                <div class="day-date">${monthsName[date.getMonth()]} ${dayNum}${isToday ? ' • Today' : ''}</div>
+            `;
+            headRow.appendChild(th);
+        });
+
+        // Build Table Body Rows (One row for each master task)
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        const dailyTotals = [0, 0, 0, 0, 0, 0, 0];
+        const dailyMaxPossible = [0, 0, 0, 0, 0, 0, 0];
+
+        allMasterTasks.forEach((taskName) => {
+            const tr = document.createElement('tr');
+
+            // Left Sticky Task Name Column
+            const tdTask = document.createElement('td');
+            tdTask.className = 'task-col';
+            tdTask.innerHTML = `<span>${taskName}</span>`;
+            tr.appendChild(tdTask);
+
+            // Columns for each day of the week
+            weekDates.forEach((date, dayIdx) => {
+                const dateKey = formatDateKey(date);
+                const dayRecord = records[dateKey] || {};
+
+                const td = document.createElement('td');
+
+                // Check if this task is applicable for this day
+                // Chia Seeds on odd days only; Gym rest day on Sunday
+                const applicable = isTaskApplicable(taskName, date);
+
+                if (!applicable) {
+                    const naBox = document.createElement('div');
+                    naBox.className = 'status-box na';
+                    naBox.innerText = '—';
+                    naBox.title = taskName === 'Gym' ? 'Sunday Gym Rest Day' : 'Not scheduled for Even Days';
+                    td.appendChild(naBox);
+                } else {
+                    dailyMaxPossible[dayIdx]++;
+                    const status = dayRecord[taskName];
+                    const isCompleted = status === 'Completed';
+
+                    if (isCompleted) {
+                        dailyTotals[dayIdx]++;
+                    }
+
+                    const box = document.createElement('div');
+                    box.className = `status-box ${isCompleted ? 'completed' : 'pending'}`;
+                    box.innerText = isCompleted ? '✓' : '✗';
+                    box.title = `${taskName} on ${dateKey}: ${isCompleted ? 'Completed (Green)' : 'Pending (Red)'}`;
+
+                    // Toggle directly on table cell
+                    box.addEventListener('click', () => {
+                        const current = records[dateKey] || {};
+                        current[taskName] = current[taskName] === 'Completed' ? 'Pending' : 'Completed';
+                        records[dateKey] = current;
+                        saveStoredRecords(records);
+
+                        if (dateKey === todayKey) {
+                            renderTaskList();
+                        }
+                        renderWeeklyTable();
+                        updateStreakDisplay();
+                    });
+
+                    td.appendChild(box);
+                }
+
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+
+        // Summary Score Row
+        const summaryRow = document.getElementById('table-summary-row');
+        summaryRow.innerHTML = '<td class="task-col" style="font-weight:700;">Score / Total</td>';
+
+        weekDates.forEach((date, dayIdx) => {
+            const td = document.createElement('td');
+            const total = dailyTotals[dayIdx];
+            const max = dailyMaxPossible[dayIdx];
+            const pct = max > 0 ? Math.round((total / max) * 100) : 0;
+            
+            td.innerHTML = `
+                <div style="font-weight:700; color:${total === max && max > 0 ? 'var(--success)' : 'var(--gray-800)'};">${total}/${max}</div>
+                <div style="font-size:10px; color:var(--gray-500);">${pct}%</div>
+            `;
+            summaryRow.appendChild(td);
+        });
+
+        // Calculate Weekly Average Success Score
+        const weekCompletedSum = dailyTotals.reduce((a, b) => a + b, 0);
+        const weekPossibleSum = dailyMaxPossible.reduce((a, b) => a + b, 0);
+        const weeklyPct = weekPossibleSum > 0 ? Math.round((weekCompletedSum / weekPossibleSum) * 100) : 0;
+        
+        const consistencyVal = document.getElementById('weekly-consistency-val');
+        if (consistencyVal) {
+            consistencyVal.innerText = `${weeklyPct}% (${weekCompletedSum}/${weekPossibleSum})`;
+        }
+        const scoreDot = document.getElementById('score-dot');
+        if (scoreDot) {
+            scoreDot.style.background = weeklyPct >= 80 ? 'var(--success)' : (weeklyPct >= 50 ? 'var(--warning)' : 'var(--danger)');
         }
     }
 
-    setHeader();
+    // Fetch and sync data from Google Sheet
+    async function fetchSheetData(isManual = false) {
+        const msg = document.getElementById('msg');
+        if (isManual) { msg.innerText = "Updating..."; msg.style.color = "#4b5563"; }
+        msg.style.color = "#4b5563";
+
+        const scriptUrl = getScriptURL();
+
+        try {
+            const response = await fetch(scriptUrl, {
+                method: 'GET',
+                mode: 'cors'
+            });
+
+            if (response.ok) {
+                const resData = await response.json();
+                if (resData && (resData.data || resData.records)) {
+                    parseAndMergeSheetData(resData.data || resData.records);
+                    if (isManual) { msg.innerText = "✅ Updated"; msg.style.color = "#059669"; setTimeout(() => { msg.innerText = ""; }, 2500); }
+                    renderTaskList();
+                    renderWeeklyTable();
+                    return;
+                }
+            }
+            throw new Error("No structured data returned from GET");
+        } catch (err) {
+            console.log("Sheet fetch note:", err);
+            if (isManual) {
+                msg.innerText = "✅ Updated";
+                msg.style.color = "#059669";
+                setTimeout(() => { msg.innerText = ""; }, 2500);
+            }
+            renderWeeklyTable();
+        }
+    }
+
+    function parseAndMergeSheetData(rows) {
+        if (!Array.isArray(rows)) return;
+        const records = getStoredRecords();
+
+        rows.forEach(row => {
+            if (row && typeof row === 'object') {
+                // If row has date and tasks
+                let dateKey = row.date;
+                if (!dateKey && row[0]) {
+                    const parsed = new Date(row[0]);
+                    if (!isNaN(parsed)) dateKey = formatDateKey(parsed);
+                }
+
+                if (dateKey) {
+                    records[dateKey] = records[dateKey] || {};
+                    if (row.tasks && Array.isArray(row.tasks)) {
+                        row.tasks.forEach(t => {
+                            if (t.task && t.status) records[dateKey][t.task] = t.status;
+                        });
+                    }
+                }
+            }
+        });
+
+        saveStoredRecords(records);
+    }
+
+    
+
+    // Auto-refresh when date changes (midnight rollover)
+    setInterval(() => {
+        if (new Date().getDate() !== dayIndex) {
+            dayIndex = new Date().getDate();
+            renderPlannerHeader();
+            renderTaskList();
+            renderWeeklyTable();
+        }
+    }, 15000);
+
+    // Initial setup on load
+    function init() {
+        renderPlannerHeader();
+        renderTaskList();
+        renderWeeklyTable();
+        updateStreakDisplay();
+        // Try gentle sync with sheet
+        setTimeout(fetchSheetData, 800);
+    }
+
+    init();
 </script>
 
 </body>
