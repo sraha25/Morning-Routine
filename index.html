@@ -731,6 +731,11 @@
 </div>
 
 
+<div >
+            This has been updated in satwikraha26@gmail.com's 'Daily Routine' Google Sheet.      
+</div>
+
+
 
 
 <script>
@@ -776,7 +781,7 @@
         "bath"
     ];
 
-    const defaultScriptURL = 'https://script.google.com/macros/s/AKfycbxgeI6YUSd3XZ-hofQqiDpWpLnpgHrm0Jldj0UyVi0cO3cmdXl9aFXId-erocLeEkxX/exec';
+    const defaultScriptURL = 'https://script.google.com/macros/s/AKfycbwPHSOrygOvwA-LtOPfFeawFspnm5DEsYLFi-Fjd6ROpqqSeKBQXXGmrbo5lSSwcXuS/exec';
     
     function getScriptURL() {
         try {
@@ -1122,13 +1127,52 @@
         return weekDates;
     }
 
-    function changeWeek(delta) {
+    async function changeWeek(delta) {
         if (delta === 0) {
             weekOffset = 0;
         } else {
             weekOffset += delta;
         }
-        renderWeeklyTable();
+        renderWeeklyTable();          // show what we have locally right away
+        await fetchWeekFromSheet();   // then load that week's saved data from the sheet
+    }
+
+    // Fetch only the visible week from Google Sheet and merge it in
+    async function fetchWeekFromSheet() {
+        const w = getWeekDates(weekOffset);
+        const url = `${getScriptURL()}?start=${formatDateKey(w[0])}&end=${formatDateKey(w[6])}`;
+        try {
+            const res = await fetch(url, { method: 'GET', mode: 'cors' });
+            const json = await res.json();
+            if (json && json.data) {
+                parseAndMergeSheetData(json.data);
+                renderWeeklyTable();
+                if (weekOffset === 0) renderTaskList();
+            }
+        } catch (err) {
+            console.log('Week fetch note:', err);
+        }
+    }
+
+    // Silently push one day's saved record to the sheet
+    async function pushDayToSheet(dateKey) {
+        const rec = getStoredRecords()[dateKey] || {};
+        const d = new Date(dateKey + 'T00:00:00');
+        try {
+            await fetch(getScriptURL(), {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    date: dateKey,
+                    day: daysName[d.getDay()],
+                    dayNumber: d.getDate(),
+                    tasks: Object.keys(rec).map(t => ({ task: t, status: rec[t] })),
+                    timestamp: new Date().toISOString(),
+                    isLocked: false
+                })
+            });
+        } catch (e) { console.log('Push note:', e); }
     }
 
     function renderWeeklyTable() {
@@ -1214,6 +1258,7 @@
                         current[taskName] = current[taskName] === 'Completed' ? 'Pending' : 'Completed';
                         records[dateKey] = current;
                         saveStoredRecords(records);
+                        pushDayToSheet(dateKey);
 
                         if (dateKey === todayKey) {
                             renderTaskList();
@@ -1327,6 +1372,18 @@
     }
 
     
+
+    // Auto-sync to the sheet at 11:58-11:59 PM (works while the page is open)
+    let lastNightlySync = '';
+    setInterval(() => {
+        const n = new Date();
+        const key = formatDateKey(n);
+        if (n.getHours() === 23 && n.getMinutes() >= 58 && lastNightlySync !== key) {
+            lastNightlySync = key;
+            if (document.querySelectorAll('#task-list .task').length) saveData(false);
+            else pushDayToSheet(key);
+        }
+    }, 10000);
 
     // Auto-refresh when date changes (midnight rollover)
     setInterval(() => {
